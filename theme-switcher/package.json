@@ -1,0 +1,32 @@
+{
+  "name": "@rem2/plugin-theme-switcher",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Theme switcher: light/dark/system themes, form panel, persisted accent",
+  "license": "MIT",
+  "main": "./dist/index.js",
+  "exports": {
+    ".": "./dist/index.js"
+  },
+  "files": [
+    "dist",
+    "plugin.json"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "esbuild src/index.ts --bundle --format=esm --platform=node --target=node20 --external:node:* --outfile=dist/index.js",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "esbuild": "^0.28.2",
+    "rem2-kernel": "link:../../REM2",
+    "typescript": "^6.0.3",
+    "vitest": "^3.0.0"
+  }
+}

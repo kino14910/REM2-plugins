@@ -1,0 +1,21 @@
+{
+  "id": "com.rem2.theme-switcher",
+  "name": "Theme Switcher",
+  "version": "1.0.0",
+  "entry": "dist/index.js",
+  "contributes": [
+    { "point": "ui.theme", "id": "light" },
+    { "point": "ui.theme", "id": "dark" },
+    { "point": "ui.theme", "id": "system" },
+    { "point": "ui.panel", "id": "theme-switcher" },
+    { "point": "ui.route", "id": "/theme" }
+  ],
+  "requires": ["ui.theme", "ui.panel", "ui.route"],
+  "compatibility": {
+    "minKernel": "^1.0.0",
+    "contractVersion": "1"
+  },
+  "author": "rem2-plugins",
+  "description": "Light/dark/system theme catalog plus a form panel for mode and accent preferences",
+  "tags": ["ui", "theme", "settings"]
+}
