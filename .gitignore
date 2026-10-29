@@ -1,0 +1,17 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Test / build caches
+coverage/
+*.tsbuildinfo
+
+# Logs and OS noise
+*.log
+.DS_Store
+Thumbs.db
+
+# Plugin runtime data (tests always use OS temp directories instead)
+theme-switcher/data/
+
+# dist/ is intentionally NOT ignored: dist/index.js is the installable artifact.

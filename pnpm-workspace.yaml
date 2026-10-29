@@ -1,0 +1,6 @@
+packages:
+  - theme-switcher
+
+# esbuild ships a native binary installed by its postinstall script.
+allowBuilds:
+  esbuild: true

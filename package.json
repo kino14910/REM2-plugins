@@ -1,0 +1,18 @@
+{
+  "name": "rem2-plugins",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Standalone plugin repository for REM2 (Kernel + Everything-as-Plugin)",
+  "license": "MIT",
+  "engines": {
+    "node": ">=20",
+    "pnpm": ">=9"
+  },
+  "scripts": {
+    "build": "pnpm -r --if-present run build",
+    "test": "pnpm -r --if-present run test",
+    "typecheck": "pnpm -r --if-present run typecheck",
+    "verify": "pnpm typecheck && pnpm test && pnpm build"
+  }
+}
