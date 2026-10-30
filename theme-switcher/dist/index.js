@@ -63,12 +63,17 @@ var Topics = {
   PluginFailed: "kernel.plugin.failed",
   PluginReloaded: "kernel.plugin.reloaded",
   PluginUnloaded: "kernel.plugin.unloaded",
+  /** Host-originated remote package download progress (forwarded to the renderer). */
+  PluginDownloadProgress: "plugin.download.progress",
   /** Configuration */
   ConfigChanged: "config.changed",
   /** Commands (commonly used by feature plugins) */
   CommandExecute: "command.execute",
   CommandResult: "command.result",
   /** UI (consumed by the frontend via an IPC allowlist; raw plugin events never leak) */
+  UiThemeSet: "ui.theme.set",
+  /** Re-read a mutated theme catalog and publish the materialized active theme. */
+  UiThemeRefresh: "ui.theme.refresh",
   UiThemeChanged: "ui.theme.changed",
   /** Plugins proactively push panel data refreshes (`panel.data-changed`). */
   PanelDataChanged: "ui.panel.data-changed",
@@ -157,7 +162,8 @@ var PANEL_ID = "theme-switcher";
 var ROUTE_PATH = "/theme";
 var PANEL_COMMAND = "com.rem2.theme-switcher.data";
 var PREFERENCES_RELATIVE_PATH = "data/preferences.json";
-var UI_THEME_SET_TOPIC = Topics.UiThemeSet ?? "ui.theme.set";
+var UI_THEME_SET_TOPIC = Topics.UiThemeSet;
+var UI_THEME_REFRESH_TOPIC = Topics.UiThemeRefresh;
 
 // src/preferences.ts
 import { mkdir, readFile, rename, rm, writeFile } from "node:fs/promises";
@@ -406,9 +412,7 @@ var index_default = definePlugin(
   },
   (ctx) => {
     const themes = createThemeSet();
-    const store = new PreferencesStore(
-      ctx.resolvePath(PREFERENCES_RELATIVE_PATH)
-    );
+    const store = new PreferencesStore(ctx.dataPath(PREFERENCES_RELATIVE_PATH));
     let mode = DEFAULT_MODE;
     let accent = DEFAULT_ACCENT;
     let unsubscribes = [];
@@ -472,7 +476,13 @@ var index_default = definePlugin(
         };
       }
       const theme = currentTheme();
-      if (theme) await ctx.events.emit(Topics.UiThemeChanged, theme);
+      if (theme) {
+        try {
+          await ctx.events.request(UI_THEME_REFRESH_TOPIC, void 0);
+        } catch {
+          await ctx.events.emit(Topics.UiThemeChanged, theme);
+        }
+      }
       await emitPanelData();
       return { ok: true };
     }

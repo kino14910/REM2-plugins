@@ -46,9 +46,17 @@ The panel command also accepts `ui.event` requests of the shape
 
 Host-originated `ui.theme.changed` (for example a top-bar light/dark/system switch) is mirrored into preferences, so the panel and the host stay consistent.
 
+#### Host integration
+
+REM2 (this checkout is the sibling `REM2` repository) automatically discovers
+`theme-switcher/plugin.json` and builds it into `plugins-dist` during
+`pnpm build:plugins`; the old built-in `theme-dark` source has been removed.
+Set `REM2_EXTERNAL_PLUGINS_DIR` if the two repositories are not siblings.
+
 #### Preferences
 
-Stored at the plugin-relative path `data/preferences.json` (resolved with `ctx.resolvePath`):
+Stored at `data/preferences.json` inside the host-provided writable plugin data root
+(`ctx.dataPath`, i.e. `<host plugin-data>/com.rem2.theme-switcher/data/preferences.json`):
 
 ```json
 { "version": 1, "mode": "system", "accent": "#4f9cf9" }
@@ -61,11 +69,17 @@ Stored at the plugin-relative path `data/preferences.json` (resolved with `ctx.r
 
 #### Kernel contract notes
 
-This plugin is built against the current public `rem2-kernel` surface and expects these upcoming REM2 additions:
+This plugin is built against the current public `rem2-kernel` surface:
 
-- `Topics.UiThemeSet` with value `ui.theme.set`. Until it is exported, `src/constants.ts` falls back to the literal value.
-- `PanelFormData` / `PanelFormField` exported from `rem2-kernel`. Until then `src/types.ts` mirrors their contract exactly (swap to `import type` when available).
-- A `system` theme mode and `followSystem` flag on the theme contracts. `ThemeDefinitionWithSystem` models that extension locally.
+- `Topics.UiThemeSet` (`ui.theme.set`) forwards mode changes to the host.
+- `Topics.UiThemeRefresh` (`ui.theme.refresh`) asks the host to re-materialize a
+  `followSystem` theme after an in-place accent update; older hosts fall back to
+  emitting `ui.theme.changed` directly.
+- `PanelFormData` / `PanelFormField` / `PanelFormOption` are imported from
+  `rem2-kernel` and rendered by the generic `PanelShell` form branch.
+- `ThemeMode` includes `system`; `ThemeDefinition.followSystem` tells the host to
+  resolve the effective light/dark palette from the OS while preserving the
+  `system` selection id.
 
 ## Development
 
@@ -118,8 +132,8 @@ REM2-plugins/
 
 1. Build it (`pnpm build`).
 2. Copy `theme-switcher/plugin.json` and `theme-switcher/dist/index.js` into a plugin directory (the `dist/` folder must sit next to `plugin.json`).
-3. Ensure the host grants the declared capabilities `ui.theme`, `ui.panel`, `ui.route` (a sandboxed user plugin needs explicit grants; the manifest always declares them).
-4. The host must support the event-bus `ui.theme.set` topic and render the generic `form` panel shape.
+3. Ensure the host grants the declared capabilities `ui.theme`, `ui.panel`, `ui.route` (a sandboxed user plugin needs explicit grants; the manifest always declares them). A shipped build artifact under the REM2 `plugins-dist` root inherits the trusted built-in grant.
+4. The host must support `Topics.UiThemeSet` / `UiThemeRefresh`, the generic `form` panel shape, `ThemeDefinition.followSystem`, and `ctx.dataPath`.
 
 ## License
 

@@ -217,6 +217,8 @@ export function createTestContext(
     plugins: { all: () => [] },
     resolvePath: (relative: string): string =>
       path.resolve(rootDir, relative),
+    dataPath: (relative: string): string =>
+      path.resolve(rootDir, relative),
   } as unknown as PluginContext
 
   return { ctx, bus, contributions, logs, rootDir }

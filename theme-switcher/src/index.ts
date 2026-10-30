@@ -74,9 +74,7 @@ export default definePlugin(
   },
   (ctx: PluginContext) => {
     const themes = createThemeSet()
-    const store = new PreferencesStore(
-      ctx.resolvePath(PREFERENCES_RELATIVE_PATH),
-    )
+    const store = new PreferencesStore(ctx.dataPath(PREFERENCES_RELATIVE_PATH))
 
     let mode: ThemeMode = DEFAULT_MODE
     let accent = DEFAULT_ACCENT
