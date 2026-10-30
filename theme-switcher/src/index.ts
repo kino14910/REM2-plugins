@@ -26,6 +26,7 @@ import {
   PLUGIN_VERSION,
   PREFERENCES_RELATIVE_PATH,
   ROUTE_PATH,
+  UI_THEME_REFRESH_TOPIC,
   UI_THEME_SET_TOPIC,
 } from './constants.js'
 import { buildPanelFormData, parsePanelChange } from './panel.js'
@@ -154,7 +155,15 @@ export default definePlugin(
       }
 
       const theme = currentTheme()
-      if (theme) await ctx.events.emit(Topics.UiThemeChanged, theme)
+      if (theme) {
+        try {
+          // The host resolves followSystem to the current OS palette before publishing.
+          await ctx.events.request(UI_THEME_REFRESH_TOPIC, undefined)
+        } catch {
+          // Compatibility with hosts that predate the refresh topic.
+          await ctx.events.emit(Topics.UiThemeChanged, theme)
+        }
+      }
       await emitPanelData()
       return { ok: true }
     }

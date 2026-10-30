@@ -20,5 +20,6 @@ export const PREFERENCES_RELATIVE_PATH = 'data/preferences.json'
  * the switch currently exposed as an IPC method. Reading it defensively keeps
  * this standalone plugin working against kernels that do not export it yet.
  */
-export const UI_THEME_SET_TOPIC: string =
-  (Topics as unknown as { UiThemeSet?: string }).UiThemeSet ?? 'ui.theme.set'
+export const UI_THEME_SET_TOPIC: string = Topics.UiThemeSet
+/** Re-materializes followSystem themes after an in-place accent update. */
+export const UI_THEME_REFRESH_TOPIC: string = Topics.UiThemeRefresh
