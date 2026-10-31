@@ -48,10 +48,16 @@ Host-originated `ui.theme.changed` (for example a top-bar light/dark/system swit
 
 #### Host integration
 
-REM2 (this checkout is the sibling `REM2` repository) automatically discovers
-`theme-switcher/plugin.json` and builds it into `plugins-dist` during
-`pnpm build:plugins`; the old built-in `theme-dark` source has been removed.
-Set `REM2_EXTERNAL_PLUGINS_DIR` if the two repositories are not siblings.
+REM2 (this checkout is the sibling `REM2` repository) builds this plugin into
+`plugins-external-dist` during `pnpm build:external`; it is **not** bundled as a
+built-in. Publishing a tag (`theme-switcher-v1.0.0`) runs
+`.github/workflows/release.yml`, which packages `theme-switcher-<version>.zip`
+plus its `.sha256` sidecar and creates a GitHub release. In REM2, install it via
+**Plugins → Install from URL…** with the release URL, then grant the declared
+`ui.theme` / `ui.panel` / `ui.route` capabilities in the plugin detail before
+enabling it (user plugins are sandboxed and those capabilities are denied by
+default). Set `REM2_EXTERNAL_PLUGINS_DIR` if the two repositories are not
+siblings.
 
 #### Preferences
 
@@ -125,15 +131,24 @@ REM2-plugins/
     │   ├── panel.ts        # form data + strict change validation
     │   └── index.ts        # definePlugin wiring (lifecycle/events)
     ├── tests/              # unit + integration tests (temp dirs only)
+    ├── scripts/package-plugin.mjs  # release ZIP + .sha256 sidecar
     └── dist/index.js       # build artifact (committed/installable)
+
 ```
 
 ## Installing the plugin into REM2
 
-1. Build it (`pnpm build`).
-2. Copy `theme-switcher/plugin.json` and `theme-switcher/dist/index.js` into a plugin directory (the `dist/` folder must sit next to `plugin.json`).
-3. Ensure the host grants the declared capabilities `ui.theme`, `ui.panel`, `ui.route` (a sandboxed user plugin needs explicit grants; the manifest always declares them). A shipped build artifact under the REM2 `plugins-dist` root inherits the trusted built-in grant.
-4. The host must support `Topics.UiThemeSet` / `UiThemeRefresh`, the generic `form` panel shape, `ThemeDefinition.followSystem`, and `ctx.dataPath`.
+1. Publish a release (`node scripts/package-plugin.mjs theme-switcher` locally, or
+   push a `theme-switcher-v*` tag so the workflow does it).
+2. In REM2 open **Plugins → Install from URL…** and use the release URL
+   (`https://github.com/kino14910/REM2-plugins/releases/tag/<tag>`); inspect,
+   then confirm. The host reads the `.sha256` sidecar as the trusted digest.
+3. The plugin installs as `Disabled` (source=user, sandboxed). Open its detail
+   and click **Grant denied capabilities** (declares `ui.theme`, `ui.panel`,
+   `ui.route`), then **Enable**.
+4. The host must support `plugin.permission.grant`, `Topics.UiThemeSet` /
+   `UiThemeRefresh`, the generic `form` panel shape,
+   `ThemeDefinition.followSystem`, and `ctx.dataPath`.
 
 ## License
 

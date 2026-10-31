@@ -14,4 +14,7 @@ Thumbs.db
 # Plugin runtime data (tests always use OS temp directories instead)
 theme-switcher/data/
 
+# Release archives produced by `pnpm package`; CI rebuilds them per tag.
+dist-packages/
+
 # dist/ is intentionally NOT ignored: dist/index.js is the installable artifact.

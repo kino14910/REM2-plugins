@@ -1,0 +1,37 @@
+name: Release plugin
+
+# Tag a plugin version (e.g. `theme-switcher-v1.0.0`) to publish the ZIP that
+# REM2 installs from "Install from URL…". The release must contain exactly one
+# .zip asset (the host refuses ambiguous releases) plus its .sha256 sidecar,
+# which is the only trusted digest source next to GitHub's own asset digest.
+on:
+  push:
+    tags:
+      - 'theme-switcher-v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      # dist/index.js is committed; packaging uses it as the installable artifact.
+      - name: Package release archive
+        run: node scripts/package-plugin.mjs theme-switcher
+      - name: Publish release assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${GITHUB_REF_NAME}" \
+            dist-packages/theme-switcher-*.zip \
+            dist-packages/theme-switcher-*.zip.sha256 \
+            --title "Theme Switcher ${GITHUB_REF_NAME}" \
+            --notes "Install in REM2: Plugins → Install from URL… → https://github.com/kino14910/REM2-plugins/releases/tag/${GITHUB_REF_NAME}"
